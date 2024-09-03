@@ -1,0 +1,11 @@
+Language: Cpp
+BasedOnStyle: LLVM
+
+AlignEscapedNewlines: DontAlign
+AlignAfterOpenBracket: BlockIndent
+IndentWidth: 4
+TabWidth: 4
+PointerAlignment: Left
+SpaceBeforeParens: Never
+BinPackArguments: false
+AllowShortFunctionsOnASingleLine: None

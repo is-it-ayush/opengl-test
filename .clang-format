@@ -3,8 +3,8 @@ BasedOnStyle: LLVM
 
 AlignEscapedNewlines: DontAlign
 AlignAfterOpenBracket: BlockIndent
-IndentWidth: 4
-TabWidth: 4
+IndentWidth: 2
+TabWidth: 2
 PointerAlignment: Left
 SpaceBeforeParens: Never
 BinPackArguments: false

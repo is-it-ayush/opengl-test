@@ -26,11 +26,17 @@ const char* frag_shader_source = "#version 330 core\n"
                                  "}\n";
 float vertices[] = {
     // x     y     z
-   -0.5f, -0.5f, 0.0f,
-    0.5f, -0.5f, 0.0f,
-    0.0f,  0.5f, 0.0f,
+    0.5f,  0.5f, 0.0f, // top right
+    0.5f, -0.5f, 0.0f, // bottom right
+   -0.5f,  0.5f, 0.0f, // top left
+   -0.5f, -0.5f, 0.0f, // bottom left
+};
+unsigned int indices[] = {
+  0, 1, 2, // triangle 1
+  1, 2, 3, // triangle 2
 };
 
+GLuint ebo;
 GLuint vbo;
 GLuint vao;
 void process_buffers() {
@@ -44,6 +50,11 @@ void process_buffers() {
   glBindVertexArray(vao);
   glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
   glEnableVertexAttribArray(0);
+
+  // element buffer object
+  glGenBuffers(1, &ebo);
+  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
+  glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_DYNAMIC_DRAW);
 }
 
 const char* shader_type_as_cstr(GLuint shader) {
@@ -228,7 +239,8 @@ int main() {
     glClear(GL_COLOR_BUFFER_BIT);
 
     // render
-    glDrawArrays(GL_TRIANGLES, 0, 3);
+    // glDrawArrays(GL_TRIANGLES, 0, 3);
+    glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 
     // poll for events, call the registered callbacks & finally swap buffers on
     // window

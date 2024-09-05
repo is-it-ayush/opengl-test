@@ -15,14 +15,17 @@
 const char* vertex_shader_source =
     "#version 330 core\n"
     "layout (location = 0) in vec3 verPos;\n"
+    "out vec4 vertexColor;\n"
     "void main() {\n"
-    "  gl_Position = vec4(verPos.x, verPos.y, verPos.z, 1.0);\n"
+    "  gl_Position = vec4(verPos, 1.0);\n"
+    "  vertexColor = vec4(0.5, 0.0, 0.0, 1.0);\n"
     "}\n";
 
 const char* frag_shader_source = "#version 330 core\n"
                                  "out vec4 frag_color;\n"
+                                 "in vec4 vertexColor;\n"
                                  "void main() {\n"
-                                 "  frag_color = vec4(1.0f, 1.0f, 1.0f, 1.0f);\n"
+                                 "  frag_color = vertexColor;\n"
                                  "}\n";
 float vertices[] = {
     // x     y     z
@@ -222,7 +225,7 @@ int main() {
   glEnable(GL_BLEND);
   glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-  glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+  // glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
   // callbacks
   glfwSetFramebufferSizeCallback(window, window_size_callback);
@@ -239,7 +242,7 @@ int main() {
     process_keyboard(window);
 
     // clear frame before rendering
-    glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+    glClearColor(0.2f, 0.1f, 0.7f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT);
 
     // render

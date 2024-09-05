@@ -1,4 +1,3 @@
-#include <math.h>
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -16,21 +15,25 @@
 #define DEFAULT_SCREEN_WIDTH 800
 #define DEFAULT_SCREEN_HEIGHT 600
 
-const char* vertex_shader_source = "#version 330 core\n"
-                                   "layout (location = 0) in vec3 verPos;\n"
-                                   "void main() {\n"
-                                   "  gl_Position = vec4(verPos, 1.0);\n"
-                                   "}\n";
+char* vertex_shader_source = "#version 330 core\n"
+                             "layout (location = 0) in vec3 verPos;\n"
+                             "layout (location = 1) in vec3 colorPos;\n"
+                             "out vec3 color;\n"
+                             "void main() {\n"
+                             "  color = colorPos;\n"
+                             "  gl_Position = vec4(verPos, 1.0);\n"
+                             "}\n";
 
-const char* frag_shader_source = "#version 330 core\n"
-                                 "out vec4 frag_color;\n"
-                                 "uniform vec4 global_color_var;\n"
-                                 "void main() {\n"
-                                 "  frag_color = global_color_var;\n"
-                                 "}\n";
+char* frag_shader_source = "#version 330 core\n"
+                           "out vec4 frag_color;\n"
+                           "in vec3 color;\n"
+                           "void main() {\n"
+                           "  frag_color = vec4(color, 1.0);\n"
+                           "}\n";
 float vertices[] = {
-    // x     y     z
-    0.0f, 0.5f, 0.0f, -0.5f, -0.5f, 0.0f, 0.5f, -0.5f, 0.0f,
+    // x     y     z   // colors
+    0.0f, 0.5f, 0.0f, 1.0f, 0.0f,  0.0f, -0.5f, -0.5f, 0.0f,
+    0.0f, 1.0f, 0.0f, 0.5f, -0.5f, 0.0f, 0.0f,  0.0f,  1.0f,
 };
 // unsigned int indices[] = {
 //     0,
@@ -53,8 +56,13 @@ void process_buffers() {
   // vertex array object
   glGenVertexArrays(1, &vao);
   glBindVertexArray(vao);
-  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)0);
   glEnableVertexAttribArray(0);
+
+  glVertexAttribPointer(
+      1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(3 * sizeof(float))
+  );
+  glEnableVertexAttribArray(1);
 
   // element buffer object
   // glGenBuffers(1, &ebo);
@@ -125,10 +133,8 @@ int main() {
   GLuint program = process_shaders(vertex_shader_source, frag_shader_source);
   process_buffers();
 
-  // set uniform with a dynamic value
-  int vertex_color_location = glGetUniformLocation(program, "global_color_var");
-
   // loop
+  double time = glfwGetTime();
   while(!glfwWindowShouldClose(window)) {
     process_mouse(window);
 
@@ -137,9 +143,6 @@ int main() {
     glClear(GL_COLOR_BUFFER_BIT);
 
     // render
-    double time = glfwGetTime();
-    float green_val = (sin(time) / 2.0f) + 0.5f;
-    glUniform4f(vertex_color_location, 0.0f, green_val, 0.0f, 1.0f);
 
     glDrawArrays(GL_TRIANGLES, 0, 3); // redner with vertex buffer object
     // glDrawElements( GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0); // render with

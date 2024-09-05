@@ -150,12 +150,6 @@ void process_mouse(GLFWwindow* window) {
   xpos = xpos - width * 0.5f;
   ypos = (height - ypos) - height * 0.5f;
 }
-void process_keyboard(GLFWwindow* window) {
-  // ESC should close the window
-  if(glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS) {
-    glfwSetWindowShouldClose(window, true);
-  }
-}
 
 // error/debug callback for opengl
 void MessageCallback(
@@ -176,6 +170,27 @@ void MessageCallback(
 // window resize callback for glfw
 void window_size_callback(GLFWwindow* window, int width, int height) {
   glViewport(0, 0, width, height);
+}
+
+// key callback
+bool is_wireframe = false;
+void key_callback(
+    GLFWwindow* window, int key, int scancode, int action, int mods
+) {
+  // ESC should close the window
+  if(key == GLFW_KEY_ESCAPE && action == GLFW_PRESS) {
+    glfwSetWindowShouldClose(window, true);
+  }
+
+  // toggle wireframe
+  if(key == GLFW_KEY_P && action == GLFW_PRESS) {
+    if(!is_wireframe) {
+      glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+    } else {
+      glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+    }
+    is_wireframe = !is_wireframe;
+  }
 }
 
 int main() {
@@ -220,10 +235,11 @@ int main() {
   glEnable(GL_BLEND);
   glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-  // glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+  // wireframe mode
 
   // callbacks
   glfwSetFramebufferSizeCallback(window, window_size_callback);
+  glfwSetKeyCallback(window, key_callback);
 
   // inits
   GLuint program = process_shaders();
@@ -235,7 +251,6 @@ int main() {
   // loop
   while(!glfwWindowShouldClose(window)) {
     process_mouse(window);
-    process_keyboard(window);
 
     // clear frame before rendering
     glClearColor(0.2f, 0.1f, 0.7f, 1.0f);

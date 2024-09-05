@@ -10,7 +10,8 @@
 #define GLFW_INCLUDE_GLEXT
 #include <GLFW/glfw3.h>
 
-#include "shader.h"
+#include "./src/callback.h"
+#include "./src/shader.h"
 
 #define DEFAULT_SCREEN_WIDTH 800
 #define DEFAULT_SCREEN_HEIGHT 600
@@ -29,9 +30,7 @@ const char* frag_shader_source = "#version 330 core\n"
                                  "}\n";
 float vertices[] = {
     // x     y     z
-    0.0f,  0.5f,  0.0f, // top center
-    -0.5f, -0.5f, 0.0f, // bottom left
-    0.5f,  -0.5f, 0.0f, // bottom right
+    0.0f, 0.5f, 0.0f, -0.5f, -0.5f, 0.0f, 0.5f, -0.5f, 0.0f,
 };
 // unsigned int indices[] = {
 //     0,
@@ -64,23 +63,6 @@ void process_buffers() {
   // GL_DYNAMIC_DRAW);
 }
 
-// load the vertex and fragment shader
-GLuint process_shaders() {
-  GLuint vert_shader = 0, frag_shader = 0, program = 0;
-  if(!compile_shader_source(
-         vertex_shader_source, GL_VERTEX_SHADER, &vert_shader
-     ) ||
-     !compile_shader_source(
-         frag_shader_source, GL_FRAGMENT_SHADER, &frag_shader
-     ) ||
-     !link_program(vert_shader, frag_shader, &program)) {
-    fprintf(stderr, "[ERROR] Could not compile/link shaders\n");
-    exit(1);
-  }
-  glUseProgram(program);
-  return program;
-}
-
 // input handling on screen
 void process_mouse(GLFWwindow* window) {
   int width, height;
@@ -89,48 +71,6 @@ void process_mouse(GLFWwindow* window) {
   glfwGetCursorPos(window, &xpos, &ypos);
   xpos = xpos - width * 0.5f;
   ypos = (height - ypos) - height * 0.5f;
-}
-
-// error/debug callback for opengl
-void message_callback(
-    GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length,
-    const GLchar* message, const void* userParam
-) {
-  (void)source;
-  (void)id;
-  (void)length;
-  (void)userParam;
-  fprintf(
-      stderr, "GL CALLBACK: %s type = 0x%x, severity = 0x%x, message = %s\n",
-      (type == GL_DEBUG_TYPE_ERROR ? "** GL ERROR **" : ""), type, severity,
-      message
-  );
-}
-
-// window resize callback for glfw
-void window_size_callback(GLFWwindow* window, int width, int height) {
-  glViewport(0, 0, width, height);
-}
-
-// key callback
-bool is_wireframe = false;
-void key_callback(
-    GLFWwindow* window, int key, int scancode, int action, int mods
-) {
-  // ESC should close the window
-  if(key == GLFW_KEY_ESCAPE && action == GLFW_PRESS) {
-    glfwSetWindowShouldClose(window, true);
-  }
-
-  // toggle wireframe
-  if(key == GLFW_KEY_P && action == GLFW_PRESS) {
-    if(!is_wireframe) {
-      glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-    } else {
-      glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-    }
-    is_wireframe = !is_wireframe;
-  }
 }
 
 int main() {
@@ -182,7 +122,7 @@ int main() {
   glfwSetKeyCallback(window, key_callback);
 
   // inits
-  GLuint program = process_shaders();
+  GLuint program = process_shaders(vertex_shader_source, frag_shader_source);
   process_buffers();
 
   // set uniform with a dynamic value

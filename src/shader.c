@@ -17,7 +17,6 @@ const char* shader_type_as_cstr(GLuint shader) {
   }
 }
 
-// compiler a shader resource
 bool compile_shader_source(
     const GLchar* source, GLenum shader_type, GLuint* shader
 ) {
@@ -42,7 +41,6 @@ bool compile_shader_source(
   return true;
 }
 
-// link a program with a vertex and fragment shader.
 bool link_program(GLuint vert_shader, GLuint frag_shader, GLuint* program) {
   *program = glCreateProgram();
 
@@ -65,5 +63,17 @@ bool link_program(GLuint vert_shader, GLuint frag_shader, GLuint* program) {
   glDeleteShader(vert_shader);
   glDeleteShader(frag_shader);
 
+  return program;
+}
+
+GLuint process_shaders(const GLchar* vert_source, const GLchar* frag_source) {
+  GLuint vert_shader = 0, frag_shader = 0, program = 0;
+  if(!compile_shader_source(vert_source, GL_VERTEX_SHADER, &vert_shader) ||
+     !compile_shader_source(frag_source, GL_FRAGMENT_SHADER, &frag_shader) ||
+     !link_program(vert_shader, frag_shader, &program)) {
+    fprintf(stderr, "[ERROR] Could not compile/link shaders\n");
+    exit(1);
+  }
+  glUseProgram(program);
   return program;
 }

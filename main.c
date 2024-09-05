@@ -10,6 +10,8 @@
 #define GLFW_INCLUDE_GLEXT
 #include <GLFW/glfw3.h>
 
+#include "shader.h"
+
 #define DEFAULT_SCREEN_WIDTH 800
 #define DEFAULT_SCREEN_HEIGHT 600
 
@@ -62,68 +64,6 @@ void process_buffers() {
   // GL_DYNAMIC_DRAW);
 }
 
-const char* shader_type_as_cstr(GLuint shader) {
-  switch(shader) {
-  case GL_VERTEX_SHADER:
-    return "GL_VERTEX_SHADER";
-  case GL_FRAGMENT_SHADER:
-    return "GL_FRAGMENT_SHADER";
-  default:
-    return "(Unknown)";
-  }
-}
-
-// compiler a shader resource
-bool compile_shader_source(
-    const GLchar* source, GLenum shader_type, GLuint* shader
-) {
-  *shader = glCreateShader(shader_type);
-  glShaderSource(*shader, 1, &source, NULL);
-  glCompileShader(*shader);
-
-  GLint compiled = 0;
-  glGetShaderiv(*shader, GL_COMPILE_STATUS, &compiled);
-
-  if(!compiled) {
-    GLchar message[1024];
-    GLsizei message_size = 0;
-    glGetShaderInfoLog(*shader, sizeof(message), &message_size, message);
-    fprintf(
-        stderr, "[ERROR] Could not compile %s: %.*s\n",
-        shader_type_as_cstr(shader_type), message_size, message
-    );
-    return false;
-  }
-
-  return true;
-}
-
-// link a program with a vertex and fragment shader.
-bool link_program(GLuint vert_shader, GLuint frag_shader, GLuint* program) {
-  *program = glCreateProgram();
-
-  glAttachShader(*program, vert_shader);
-  glAttachShader(*program, frag_shader);
-  glLinkProgram(*program);
-
-  GLint linked = 0;
-  glGetProgramiv(*program, GL_LINK_STATUS, &linked);
-  if(!linked) {
-    GLsizei message_size = 0;
-    GLchar message[1024];
-
-    glGetProgramInfoLog(*program, sizeof(message), &message_size, message);
-    fprintf(
-        stderr, "[Error] Could not link program: %.*s\n", message_size, message
-    );
-  }
-
-  glDeleteShader(vert_shader);
-  glDeleteShader(frag_shader);
-
-  return program;
-}
-
 // load the vertex and fragment shader
 GLuint process_shaders() {
   GLuint vert_shader = 0, frag_shader = 0, program = 0;
@@ -152,7 +92,7 @@ void process_mouse(GLFWwindow* window) {
 }
 
 // error/debug callback for opengl
-void MessageCallback(
+void message_callback(
     GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length,
     const GLchar* message, const void* userParam
 ) {
@@ -230,7 +170,7 @@ int main() {
 
   // features
   glEnable(GL_DEBUG_OUTPUT);
-  glDebugMessageCallback(MessageCallback, 0);
+  glDebugMessageCallback(message_callback, 0);
 
   glEnable(GL_BLEND);
   glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);

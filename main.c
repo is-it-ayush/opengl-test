@@ -54,7 +54,9 @@ void process_buffers() {
   // element buffer object
   glGenBuffers(1, &ebo);
   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
-  glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_DYNAMIC_DRAW);
+  glBufferData(
+      GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_DYNAMIC_DRAW
+  );
 }
 
 const char* shader_type_as_cstr(GLuint shader) {
@@ -220,6 +222,8 @@ int main() {
   glEnable(GL_BLEND);
   glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
+  glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+
   // callbacks
   glfwSetFramebufferSizeCallback(window, window_size_callback);
 
@@ -239,8 +243,11 @@ int main() {
     glClear(GL_COLOR_BUFFER_BIT);
 
     // render
-    // glDrawArrays(GL_TRIANGLES, 0, 3);
-    glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+    // glDrawArrays(GL_TRIANGLES, 0, 3); // redner with vertex buffer object
+    glDrawElements(
+        GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0
+    ); // render with element buffer object indices and vertex buffer object
+       // data
 
     // poll for events, call the registered callbacks & finally swap buffers on
     // window

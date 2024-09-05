@@ -1,3 +1,4 @@
+#include <math.h>
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -12,31 +13,40 @@
 #define DEFAULT_SCREEN_WIDTH 800
 #define DEFAULT_SCREEN_HEIGHT 600
 
-const char* vertex_shader_source =
-    "#version 330 core\n"
-    "layout (location = 0) in vec3 verPos;\n"
-    "out vec4 vertexColor;\n"
-    "void main() {\n"
-    "  gl_Position = vec4(verPos, 1.0);\n"
-    "  vertexColor = vec4(0.5, 0.0, 0.0, 1.0);\n"
-    "}\n";
+const char* vertex_shader_source = "#version 330 core\n"
+                                   "layout (location = 0) in vec3 verPos;\n"
+                                   "void main() {\n"
+                                   "  gl_Position = vec4(verPos, 1.0);\n"
+                                   "}\n";
 
 const char* frag_shader_source = "#version 330 core\n"
                                  "out vec4 frag_color;\n"
-                                 "in vec4 vertexColor;\n"
+                                 "uniform vec4 global_color_var;\n"
                                  "void main() {\n"
-                                 "  frag_color = vertexColor;\n"
+                                 "  frag_color = global_color_var;\n"
                                  "}\n";
 float vertices[] = {
     // x     y     z
-    0.5f,  0.5f, 0.0f, // top right
-    0.5f, -0.5f, 0.0f, // bottom right
-   -0.5f,  0.5f, 0.0f, // top left
-   -0.5f, -0.5f, 0.0f, // bottom left
+    0.5f,
+    0.5f,
+    0.0f, // top right
+    0.5f,
+    -0.5f,
+    0.0f, // bottom right
+    -0.5f,
+    0.5f,
+    0.0f, // top left
+    -0.5f,
+    -0.5f,
+    0.0f, // bottom left
 };
 unsigned int indices[] = {
-  0, 1, 2, // triangle 1
-  1, 2, 3, // triangle 2
+    0,
+    1,
+    2, // triangle 1
+    1,
+    2,
+    3, // triangle 2
 };
 
 GLuint ebo;
@@ -128,7 +138,7 @@ bool link_program(GLuint vert_shader, GLuint frag_shader, GLuint* program) {
 }
 
 // load the vertex and fragment shader
-void process_shaders() {
+GLuint process_shaders() {
   GLuint vert_shader = 0, frag_shader = 0, program = 0;
   if(!compile_shader_source(
          vertex_shader_source, GL_VERTEX_SHADER, &vert_shader
@@ -141,6 +151,7 @@ void process_shaders() {
     exit(1);
   }
   glUseProgram(program);
+  return program;
 }
 
 // input handling on screen
@@ -231,12 +242,13 @@ int main() {
   glfwSetFramebufferSizeCallback(window, window_size_callback);
 
   // inits
-  process_shaders();
+  GLuint program = process_shaders();
   process_buffers();
 
+  // set uniform with a dynamic value
+  int vertex_color_location = glGetUniformLocation(program, "global_color_var");
+
   // loop
-  double time = glfwGetTime();
-  double prev_time = 0.0;
   while(!glfwWindowShouldClose(window)) {
     process_mouse(window);
     process_keyboard(window);
@@ -246,11 +258,14 @@ int main() {
     glClear(GL_COLOR_BUFFER_BIT);
 
     // render
+    double time = glfwGetTime();
+    float green_val = (sin(time) / 2.0f) + 0.5f;
+    glUniform4f(vertex_color_location, 0.0f, green_val, 0.0f, 1.0f);
+
     // glDrawArrays(GL_TRIANGLES, 0, 3); // redner with vertex buffer object
     glDrawElements(
         GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0
     ); // render with element buffer object indices and vertex buffer object
-       // data
 
     // poll for events, call the registered callbacks & finally swap buffers on
     // window

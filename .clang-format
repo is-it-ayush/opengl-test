@@ -7,5 +7,5 @@ IndentWidth: 2
 TabWidth: 2
 PointerAlignment: Left
 SpaceBeforeParens: Never
-BinPackArguments: false
+BinPackArguments: true
 AllowShortFunctionsOnASingleLine: None

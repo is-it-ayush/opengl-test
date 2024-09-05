@@ -27,9 +27,9 @@ const char* frag_shader_source = "#version 330 core\n"
                                  "}\n";
 float vertices[] = {
     // x     y     z
-    0.0f, 0.5f, 0.0f, // top center
+    0.0f,  0.5f,  0.0f, // top center
     -0.5f, -0.5f, 0.0f, // bottom left
-    0.5f, -0.5f, 0.0f, // bottom right
+    0.5f,  -0.5f, 0.0f, // bottom right
 };
 // unsigned int indices[] = {
 //     0,
@@ -58,7 +58,8 @@ void process_buffers() {
   // element buffer object
   // glGenBuffers(1, &ebo);
   // glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
-  // glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_DYNAMIC_DRAW);
+  // glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices,
+  // GL_DYNAMIC_DRAW);
 }
 
 const char* shader_type_as_cstr(GLuint shader) {
@@ -88,11 +89,8 @@ bool compile_shader_source(
     GLsizei message_size = 0;
     glGetShaderInfoLog(*shader, sizeof(message), &message_size, message);
     fprintf(
-        stderr,
-        "[ERROR] Could not compile %s: %.*s\n",
-        shader_type_as_cstr(shader_type),
-        message_size,
-        message
+        stderr, "[ERROR] Could not compile %s: %.*s\n",
+        shader_type_as_cstr(shader_type), message_size, message
     );
     return false;
   }
@@ -169,11 +167,8 @@ void MessageCallback(
   (void)length;
   (void)userParam;
   fprintf(
-      stderr,
-      "GL CALLBACK: %s type = 0x%x, severity = 0x%x, message = %s\n",
-      (type == GL_DEBUG_TYPE_ERROR ? "** GL ERROR **" : ""),
-      type,
-      severity,
+      stderr, "GL CALLBACK: %s type = 0x%x, severity = 0x%x, message = %s\n",
+      (type == GL_DEBUG_TYPE_ERROR ? "** GL ERROR **" : ""), type, severity,
       message
   );
 }

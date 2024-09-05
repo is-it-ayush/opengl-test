@@ -27,29 +27,20 @@ const char* frag_shader_source = "#version 330 core\n"
                                  "}\n";
 float vertices[] = {
     // x     y     z
-    0.5f,
-    0.5f,
-    0.0f, // top right
-    0.5f,
-    -0.5f,
-    0.0f, // bottom right
-    -0.5f,
-    0.5f,
-    0.0f, // top left
-    -0.5f,
-    -0.5f,
-    0.0f, // bottom left
+    0.0f, 0.5f, 0.0f, // top center
+    -0.5f, -0.5f, 0.0f, // bottom left
+    0.5f, -0.5f, 0.0f, // bottom right
 };
-unsigned int indices[] = {
-    0,
-    1,
-    2, // triangle 1
-    1,
-    2,
-    3, // triangle 2
-};
+// unsigned int indices[] = {
+//     0,
+//     1,
+//     2, // triangle 1
+//     1,
+//     2,
+//     3, // triangle 2
+// };
 
-GLuint ebo;
+// GLuint ebo;
 GLuint vbo;
 GLuint vao;
 void process_buffers() {
@@ -65,11 +56,9 @@ void process_buffers() {
   glEnableVertexAttribArray(0);
 
   // element buffer object
-  glGenBuffers(1, &ebo);
-  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
-  glBufferData(
-      GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_DYNAMIC_DRAW
-  );
+  // glGenBuffers(1, &ebo);
+  // glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
+  // glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_DYNAMIC_DRAW);
 }
 
 const char* shader_type_as_cstr(GLuint shader) {
@@ -262,10 +251,9 @@ int main() {
     float green_val = (sin(time) / 2.0f) + 0.5f;
     glUniform4f(vertex_color_location, 0.0f, green_val, 0.0f, 1.0f);
 
-    // glDrawArrays(GL_TRIANGLES, 0, 3); // redner with vertex buffer object
-    glDrawElements(
-        GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0
-    ); // render with element buffer object indices and vertex buffer object
+    glDrawArrays(GL_TRIANGLES, 0, 3); // redner with vertex buffer object
+    // glDrawElements( GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0); // render with
+    // element buffer object indices and vertex buffer object
 
     // poll for events, call the registered callbacks & finally swap buffers on
     // window

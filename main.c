@@ -30,21 +30,25 @@ char* vertex_shader_source = "#version 330 core\n"
                              "  gl_Position = vec4(verPos, 1.0);\n"
                              "}\n";
 
-char* frag_shader_source = "#version 330 core\n"
-                           "out vec4 frag_color;\n"
-                           "in vec3 color;\n"
-                           "in vec2 texture_cords;\n"
-                           "uniform sampler2D our_texture;\n"
-                           "void main() {\n"
-                           "  \n"
-                           "  frag_color = texture(our_texture, texture_cords) * vec4(color, 1.0);\n"
-                           "}\n";
+char* frag_shader_source =
+    "#version 330 core\n"
+    "out vec4 frag_color;\n"
+    "in vec3 color;\n"
+    "in vec2 texture_cords;\n"
+    "uniform sampler2D texture1;\n"
+    "uniform sampler2D texture2;\n"
+    "void main() {\n"
+    "  \n"
+    "  frag_color = mix(texture(texture1, texture_cords), texture(texture2, "
+    "texture_cords), 0.5);\n"
+    "}\n";
+
 float vertices[] = {
-  // positions          // colors           // texture coords
-   0.5f,  0.5f, 0.0f,   1.0f, 0.0f, 0.0f,   1.0f, 1.0f, // top right
-   0.5f, -0.5f, 0.0f,   0.0f, 1.0f, 0.0f,   1.0f, 0.0f, // bottom right
-  -0.5f, -0.5f, 0.0f,   0.0f, 0.0f, 1.0f,   0.0f, 0.0f, // bottom left
-  -0.5f,  0.5f, 0.0f,   1.0f, 1.0f, 0.0f,   0.0f, 1.0f  // top left
+    // positions          // colors           // texture coords
+    0.5f,  0.5f,  0.0f, 1.0f, 0.0f, 0.0f, 1.0f, 1.0f, // top right
+    0.5f,  -0.5f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f, // bottom right
+    -0.5f, -0.5f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, // bottom left
+    -0.5f, 0.5f,  0.0f, 1.0f, 1.0f, 0.0f, 0.0f, 1.0f  // top left
 };
 
 unsigned int indices[] = {
@@ -89,18 +93,23 @@ void process_buffers() {
   );
 }
 
-void process_textures() {
+void process_texture(
+    char const* path, int texture_index, GLuint channel, bool flip
+) {
   int width, height, nr_channels;
-  unsigned char* data =
-      stbi_load("./assets/container.jpg", &width, &height, &nr_channels, 0);
+  if(flip) {
+    stbi_set_flip_vertically_on_load(true);
+  }
 
+  unsigned char* data = stbi_load(path, &width, &height, &nr_channels, 0);
   if(!data) {
-    fprintf(stderr, "[Error] Could not load container.jpg");
+    fprintf(stderr, "[Error] Could not load %s", path);
     exit(1);
   }
 
   unsigned int texture;
-  glGenTextures(1, &texture);
+  glGenTextures(texture_index, &texture);
+  glActiveTexture(GL_TEXTURE0 + texture_index);
   glBindTexture(GL_TEXTURE_2D, texture);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
@@ -108,9 +117,9 @@ void process_textures() {
       GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR
   );
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
   glTexImage2D(
-      GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data
+      GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, channel, GL_UNSIGNED_BYTE,
+      data
   );
   glGenerateMipmap(GL_TEXTURE_2D);
 
@@ -176,8 +185,11 @@ int main() {
   glfwSetKeyCallback(window, key_callback);
 
   // inits
-  process_textures();
+  process_texture("./assets/container.jpg", 0, GL_RGB, false);
+  process_texture("./assets/pepe.png", 1, GL_RGBA, true);
   GLuint program = process_shaders(vertex_shader_source, frag_shader_source);
+  glUniform1i(glGetUniformLocation(program, "texture1"), 0);
+  glUniform1i(glGetUniformLocation(program, "texture2"), 1);
   process_buffers();
 
   // loop

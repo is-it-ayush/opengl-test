@@ -32,9 +32,11 @@ char* frag_shader_source = "#version 330 core\n"
                            "}\n";
 float vertices[] = {
     // x     y     z   // colors
-    0.0f, 0.5f, 0.0f, 1.0f, 0.0f,  0.0f, -0.5f, -0.5f, 0.0f,
-    0.0f, 1.0f, 0.0f, 0.5f, -0.5f, 0.0f, 0.0f,  0.0f,  1.0f,
+    0.0f, 0.5f, 0.0f, 1.0f, 0.0f,  0.0f,
+    -0.5f, -0.5f, 0.0f, 0.0f, 1.0f, 0.0f,
+    0.5f, -0.5f, 0.0f, 0.0f,  0.0f,  1.0f,
 };
+
 // unsigned int indices[] = {
 //     0,
 //     1,
@@ -139,7 +141,7 @@ int main() {
     process_mouse(window);
 
     // clear frame before rendering
-    glClearColor(0.2f, 0.1f, 0.7f, 1.0f);
+    glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT);
 
     // render

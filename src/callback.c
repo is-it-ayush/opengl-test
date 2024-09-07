@@ -28,6 +28,7 @@ void window_size_callback(GLFWwindow* window, int width, int height) {
 }
 
 // key callback
+extern float x_deg; // wraps from 0 to 360
 bool is_wireframe = false;
 void key_callback(
     GLFWwindow* window, int key, int scancode, int action, int mods
@@ -45,5 +46,13 @@ void key_callback(
       glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
     }
     is_wireframe = !is_wireframe;
+  }
+
+  if(key == GLFW_KEY_UP && (action == GLFW_PRESS || action == GLFW_REPEAT)) {
+    if(x_deg == 360) {
+      x_deg = 0.0f;
+      return 0;
+    }
+    x_deg += 1.0f;
   }
 }

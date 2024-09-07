@@ -3,13 +3,10 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "./include/cglm/cglm.h"
+#include "include/cglm/cglm.h"
 #include "include/cglm/affine-pre.h"
-#include "include/cglm/affine.h"
-#include "include/cglm/io.h"
 #include "include/cglm/mat4.h"
 #include "include/cglm/types.h"
-#include "include/cglm/util.h"
 
 #define GLEW_STATIC
 #include <GL/glew.h>
@@ -145,14 +142,13 @@ void process_mouse(GLFWwindow* window) {
   ypos = (height - ypos) - height * 0.5f;
 }
 
+float x_deg = 0.0f;
 void process_math(GLuint program_id, double time) {
   mat4 res;
   glm_mat4_identity(res); // load identity matrix
-  glm_translate(res, (vec3){0.5f, -0.5f, 0.0f});
   glm_rotate(
-      res, (float)(time), (vec3){0.0f, 0.0f, 1.0f}
-  );                                        // rotate 90deg along z-axis
-  glm_scale(res, (vec3){0.5f, 0.5f, 0.5f}); // scale by 0.5
+      res, glm_rad(x_deg), (vec3){1.0f, 0.0f, 0.0f}
+  ); // rotate 90deg along z-axis
 
   GLuint transform_loc = glGetUniformLocation(program_id, "transform");
   glUniformMatrix4fv(transform_loc, 1, GL_FALSE, *res);

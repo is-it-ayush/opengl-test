@@ -145,11 +145,12 @@ void process_mouse(GLFWwindow* window) {
   ypos = (height - ypos) - height * 0.5f;
 }
 
-void process_math(GLuint program_id) {
+void process_math(GLuint program_id, double time) {
   mat4 res;
   glm_mat4_identity(res); // load identity matrix
+  glm_translate(res, (vec3){0.5f, -0.5f, 0.0f});
   glm_rotate(
-      res, glm_rad(90.0f), (vec3){0.0f, 0.0f, 1.0f}
+      res, (float)(time), (vec3){0.0f, 0.0f, 1.0f}
   );                                        // rotate 90deg along z-axis
   glm_scale(res, (vec3){0.5f, 0.5f, 0.5f}); // scale by 0.5
 
@@ -212,11 +213,11 @@ int main() {
   glUniform1i(glGetUniformLocation(program, "texture1"), 0);
   glUniform1i(glGetUniformLocation(program, "texture2"), 1);
   process_buffers();
-  process_math(program);
 
   // loop
-  double time = glfwGetTime();
   while(!glfwWindowShouldClose(window)) {
+    double time = glfwGetTime();
+
     process_mouse(window);
 
     // clear frame before rendering
@@ -224,6 +225,7 @@ int main() {
     glClear(GL_COLOR_BUFFER_BIT);
 
     // render
+    process_math(program, time);
 
     // glDrawArrays(GL_TRIANGLES, 0, 3); // render with vertex buffer object
     glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0); // render with

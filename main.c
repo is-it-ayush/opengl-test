@@ -3,6 +3,12 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "./include/cglm/cglm.h"
+#include "include/cglm/affine-pre.h"
+#include "include/cglm/io.h"
+#include "include/cglm/mat4.h"
+#include "include/cglm/types.h"
+
 #define GLEW_STATIC
 #include <GL/glew.h>
 
@@ -136,6 +142,20 @@ void process_mouse(GLFWwindow* window) {
   ypos = (height - ypos) - height * 0.5f;
 }
 
+void process_math() {
+  vec4 a = {1.0f, 0.0f, 0.0f, 1.0f};
+
+  // prepare out transformation
+  mat4 b;
+  glm_mat4_identity(b);
+  glm_translate(b, (vec3){1.0f, 1.0f, 0.0f});
+
+  vec4 res;
+  glm_mat4_mulv(b, a, res);
+
+  printf("%f %f %f", res[0], res[1], res[2]);
+}
+
 int main() {
   // load glfw (mulit-platform windowing library)
   if(!glfwInit()) {
@@ -191,6 +211,7 @@ int main() {
   glUniform1i(glGetUniformLocation(program, "texture1"), 0);
   glUniform1i(glGetUniformLocation(program, "texture2"), 1);
   process_buffers();
+  process_math();
 
   // loop
   double time = glfwGetTime();

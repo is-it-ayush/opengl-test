@@ -5,9 +5,11 @@
 
 #include "./include/cglm/cglm.h"
 #include "include/cglm/affine-pre.h"
+#include "include/cglm/affine.h"
 #include "include/cglm/io.h"
 #include "include/cglm/mat4.h"
 #include "include/cglm/types.h"
+#include "include/cglm/util.h"
 
 #define GLEW_STATIC
 #include <GL/glew.h>
@@ -30,10 +32,11 @@ char* vertex_shader_source = "#version 330 core\n"
                              "layout (location = 2) in vec2 texPos;\n"
                              "out vec3 color;\n"
                              "out vec2 texture_cords;\n"
+                             "uniform mat4 transform;\n"
                              "void main() {\n"
                              "  color = colorPos;\n"
                              "  texture_cords = texPos;\n"
-                             "  gl_Position = vec4(verPos, 1.0);\n"
+                             "  gl_Position = transform * vec4(verPos, 1.0);\n"
                              "}\n";
 
 char* frag_shader_source =
@@ -142,18 +145,16 @@ void process_mouse(GLFWwindow* window) {
   ypos = (height - ypos) - height * 0.5f;
 }
 
-void process_math() {
-  vec4 a = {1.0f, 0.0f, 0.0f, 1.0f};
+void process_math(GLuint program_id) {
+  mat4 res;
+  glm_mat4_identity(res); // load identity matrix
+  glm_rotate(
+      res, glm_rad(90.0f), (vec3){0.0f, 0.0f, 1.0f}
+  );                                        // rotate 90deg along z-axis
+  glm_scale(res, (vec3){0.5f, 0.5f, 0.5f}); // scale by 0.5
 
-  // prepare out transformation
-  mat4 b;
-  glm_mat4_identity(b);
-  glm_translate(b, (vec3){1.0f, 1.0f, 0.0f});
-
-  vec4 res;
-  glm_mat4_mulv(b, a, res);
-
-  printf("%f %f %f", res[0], res[1], res[2]);
+  GLuint transform_loc = glGetUniformLocation(program_id, "transform");
+  glUniformMatrix4fv(transform_loc, 1, GL_FALSE, *res);
 }
 
 int main() {
@@ -211,7 +212,7 @@ int main() {
   glUniform1i(glGetUniformLocation(program, "texture1"), 0);
   glUniform1i(glGetUniformLocation(program, "texture2"), 1);
   process_buffers();
-  process_math();
+  process_math(program);
 
   // loop
   double time = glfwGetTime();
